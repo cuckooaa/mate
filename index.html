@@ -554,6 +554,29 @@
             });
         }
 
+        // 首次加载时，检查 Firebase 配置，如果失败则直接显示错误信息
+        window.addEventListener('load', () => {
+            try {
+                // Try to initialize Firebase again, if it fails, the catch block will run
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                // If everything is OK so far, wait for auth to be ready
+            } catch (error) {
+                console.error("Firebase 初始化失败:", error);
+                document.getElementById('loading-container').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                document.getElementById('app-container').innerHTML = `
+                    <div class="text-center p-8">
+                        <h2 class="text-2xl font-bold text-red-600 mb-4">应用加载失败</h2>
+                        <p class="text-gray-700">无法连接到 Firebase。请检查你的网络连接或稍后再试。</p>
+                        <p class="text-gray-700 mt-2">错误信息：${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+
     </script>
 
     <!-- 加载中的提示 -->
