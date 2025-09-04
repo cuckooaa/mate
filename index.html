@@ -73,9 +73,18 @@
         let authStateReady = false;
 
         // 全局变量
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // 将这里的占位符替换为你的 Firebase 项目配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyA0O3swBThy4KJIW_Y6slHiRlJtZS_9BZc",
+            authDomain: "mate-ba3fe.firebaseapp.com",
+            projectId: "mate-ba3fe",
+            storageBucket: "mate-ba3fe.firebasestorage.app",
+            messagingSenderId: "170057760460",
+            appId: "1:170057760460:web:2658e4f9b6b8172af0cc69",
+            measurementId: "G-G342F6TYEX"
+        };
+        const appId = firebaseConfig.appId;
+        const initialAuthToken = null; // GitHub Pages 环境下此变量不存在
         
         // Season & Week Calculation (Fixed Epoch Date)
         // Set the start date of Season 1, Week 1 to a past Sunday at 00:00:00
@@ -504,14 +513,14 @@
         
         // 核心初始化逻辑
         function initializeAppAndAuth() {
-            if (!firebaseConfig) {
-                // Firebase config is missing, show an error message and exit
+            // Check if firebaseConfig is defined
+            if (!firebaseConfig.projectId || firebaseConfig.projectId === "YOUR_PROJECT_ID") {
                 document.getElementById('loading-container').classList.add('hidden');
                 document.getElementById('app-container').classList.remove('hidden');
                 document.getElementById('app-container').innerHTML = `
                     <div class="text-center p-8">
                         <h2 class="text-2xl font-bold text-red-600 mb-4">应用加载失败</h2>
-                        <p class="text-gray-700">无法获取 Firebase 配置。请确保你的 Canvas 环境已正确配置。</p>
+                        <p class="text-gray-700">无法获取 Firebase 配置。请将你的 Firebase 配置信息填入代码中。</p>
                     </div>
                 `;
                 return;
