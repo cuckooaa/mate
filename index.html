@@ -72,8 +72,9 @@
         let userId = null;
         let authStateReady = false;
 
-        // 全局变量
-        // 将这里的占位符替换为你的 Firebase 项目配置
+        // **重要：将下面的占位符替换为你自己的 Firebase 项目配置**
+        // 如果你正在部署到 GitHub Pages 等环境，你需要手动粘贴配置。
+        // 如果是在支持 __firebase_config 变量的平台上，则此部分会被自动覆盖。
         const firebaseConfig = {
             apiKey: "AIzaSyA0O3swBThy4KJIW_Y6slHiRlJtZS_9BZc",
             authDomain: "mate-ba3fe.firebaseapp.com",
@@ -84,7 +85,7 @@
             measurementId: "G-G342F6TYEX"
         };
         const appId = firebaseConfig.appId;
-        const initialAuthToken = null; // GitHub Pages 环境下此变量不存在
+        const initialAuthToken = null;
         
         // Season & Week Calculation (Fixed Epoch Date)
         // Set the start date of Season 1, Week 1 to a past Sunday at 00:00:00
@@ -144,7 +145,6 @@
         const publicShopItemList = document.getElementById('public-shop-items');
         const privateShopItemList = document.getElementById('private-shop-items');
         const myInfoContainer = document.getElementById('my-info');
-        const addPublicShopItemForm = document.getElementById('add-public-shop-item-form');
         const addPrivateShopItemForm = document.getElementById('add-private-shop-item-form');
         const shopItemNameInput = document.getElementById('shop-item-name');
         const shopItemPointsInput = document.getElementById('shop-item-points');
@@ -562,17 +562,17 @@
         
         // 核心初始化逻辑
         function initializeAppAndAuth() {
-            // Check if firebaseConfig is defined
-            if (!firebaseConfig.projectId || firebaseConfig.projectId === "YOUR_PROJECT_ID") {
-                document.getElementById('loading-container').classList.add('hidden');
-                document.getElementById('app-container').classList.remove('hidden');
-                document.getElementById('app-container').innerHTML = `
-                    <div class="text-center p-8">
-                        <h2 class="text-2xl font-bold text-red-600 mb-4">应用加载失败</h2>
-                        <p class="text-gray-700">无法获取 Firebase 配置。请将你的 Firebase 配置信息填入代码中。</p>
-                    </div>
-                `;
-                return;
+            // Check if firebaseConfig is defined and valid
+            if (!firebaseConfig.projectId || firebaseConfig.projectId.includes("你的")) {
+                 document.getElementById('loading-container').classList.add('hidden');
+                 document.getElementById('app-container').classList.remove('hidden');
+                 document.getElementById('app-container').innerHTML = `
+                     <div class="text-center p-8">
+                         <h2 class="text-2xl font-bold text-red-600 mb-4">应用加载失败</h2>
+                         <p class="text-gray-700">无法获取 Firebase 配置。请将你的 Firebase 配置信息填入代码中。</p>
+                     </div>
+                 `;
+                 return;
             }
 
             try {
