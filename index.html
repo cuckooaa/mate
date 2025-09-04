@@ -67,9 +67,14 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDoc, setDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Global variables for Firebase instances
+        let app, db, auth;
+        let userId = null;
+        let authStateReady = false;
+
         // 全局变量
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
         // Season & Week Calculation (Fixed Epoch Date)
@@ -87,18 +92,6 @@
         }
 
         setLogLevel('debug');
-
-        let app, db, auth;
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-        } catch (e) {
-            console.error("Firebase 初始化失败:", e);
-        }
-
-        let userId = null;
-        let authStateReady = false;
 
         // 任务积分映射表
         const pointMap = {
@@ -135,53 +128,6 @@
             modal.style.display = 'none';
             modalConfirmBtn.onclick = null;
         }
-
-        // 认证状态监听
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
-                console.log("用户已登录，UID:", userId);
-                document.getElementById('user-id-display').textContent = `用户ID: ${userId}`;
-                authStateReady = true;
-
-                // 检查并创建用户积分文档
-                const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
-                const userDoc = await getDoc(userDocRef);
-                if (!userDoc.exists()) {
-                    await setDoc(userDocRef, {
-                        currentPoints: 0,
-                        totalEarnedPoints: 0,
-                        lastSettlementDate: new Date(), // Set a default settlement date
-                        avatar: `https://placehold.co/128x128/bfdbfe/ffffff?text=${userId.substring(0, 3)}`,
-                        itemsRedeemed: [],
-                    }, { merge: true });
-                }
-
-                // 在认证后立即执行结算检查
-                checkAndPerformSettlement();
-                
-                // 初始化所有监听器
-                fetchTasks();
-                fetchShopItems();
-                fetchMyInfo();
-                updateWeeklyDisplay();
-                updateTaskFormStatus();
-
-                document.getElementById('app-container').classList.remove('hidden');
-                document.getElementById('loading-container').classList.add('hidden');
-            } else {
-                console.log("用户未登录，尝试登录...");
-                try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (error) {
-                    console.error("Firebase 登录失败:", error);
-                }
-            }
-        });
 
         // 获取 HTML 元素
         const taskForm = document.getElementById('task-form');
@@ -231,6 +177,8 @@
 
             const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
             const userDoc = await getDoc(userDocRef);
+            if (!userDoc.exists()) return;
+            
             const lastSettlementDate = userDoc.data().lastSettlementDate.toDate();
 
             // Check if current date is past the settlement time AND last settlement was before this week's settlement time
@@ -287,9 +235,7 @@
             const dayOfWeek = now.getDay(); // Sunday - 0, Monday - 1
             const hour = now.getHours();
 
-            const formTitle = document.getElementById('task-form-title');
             const formStatusMessage = document.getElementById('task-form-status');
-            const submitBtn = document.querySelector('#task-form button[type="submit"]');
             
             // Planning window: Sunday 8 PM to Monday 8 PM
             const isPlanningWindow = (dayOfWeek === 0 && hour >= 20) || (dayOfWeek === 1 && hour < 20);
@@ -298,10 +244,12 @@
                 taskForm.classList.remove('opacity-50', 'pointer-events-none');
                 formStatusMessage.textContent = '现在是制定下周任务的时间。';
                 formStatusMessage.classList.add('text-green-600');
+                formStatusMessage.classList.remove('text-red-600');
             } else {
                 taskForm.classList.add('opacity-50', 'pointer-events-none');
                 formStatusMessage.textContent = '制定任务的时间已过。请在下周日晚8点至下周一晚8点期间进行。';
                 formStatusMessage.classList.add('text-red-600');
+                formStatusMessage.classList.remove('text-green-600');
             }
         }
         
@@ -553,16 +501,71 @@
                 }
             });
         }
+        
+        // 核心初始化逻辑
+        function initializeAppAndAuth() {
+            if (!firebaseConfig) {
+                // Firebase config is missing, show an error message and exit
+                document.getElementById('loading-container').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                document.getElementById('app-container').innerHTML = `
+                    <div class="text-center p-8">
+                        <h2 class="text-2xl font-bold text-red-600 mb-4">应用加载失败</h2>
+                        <p class="text-gray-700">无法获取 Firebase 配置。请确保你的 Canvas 环境已正确配置。</p>
+                    </div>
+                `;
+                return;
+            }
 
-        // 首次加载时，检查 Firebase 配置，如果失败则直接显示错误信息
-        window.addEventListener('load', () => {
             try {
-                // Try to initialize Firebase again, if it fails, the catch block will run
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                // If everything is OK so far, wait for auth to be ready
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("用户已登录，UID:", userId);
+                        document.getElementById('user-id-display').textContent = `用户ID: ${userId}`;
+                        authStateReady = true;
+
+                        const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
+                        const userDoc = await getDoc(userDocRef);
+                        if (!userDoc.exists()) {
+                            await setDoc(userDocRef, {
+                                currentPoints: 0,
+                                totalEarnedPoints: 0,
+                                lastSettlementDate: new Date(),
+                                avatar: `https://placehold.co/128x128/bfdbfe/ffffff?text=${userId.substring(0, 3)}}`,
+                                itemsRedeemed: [],
+                            }, { merge: true });
+                        }
+                        
+                        checkAndPerformSettlement();
+                        
+                        fetchTasks();
+                        fetchShopItems();
+                        fetchMyInfo();
+                        updateWeeklyDisplay();
+                        updateTaskFormStatus();
+                        
+                        document.getElementById('app-container').classList.remove('hidden');
+                        document.getElementById('loading-container').classList.add('hidden');
+                    } else {
+                        console.log("用户未登录，尝试登录...");
+                        try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } catch (error) {
+                            console.error("Firebase 登录失败:", error);
+                            showModal("登录失败", `无法登录到Firebase: ${error.message}`, false);
+                        }
+                    }
+                });
+
             } catch (error) {
                 console.error("Firebase 初始化失败:", error);
                 document.getElementById('loading-container').classList.add('hidden');
@@ -575,7 +578,9 @@
                     </div>
                 `;
             }
-        });
+        }
+        
+        window.onload = initializeAppAndAuth;
 
     </script>
 
