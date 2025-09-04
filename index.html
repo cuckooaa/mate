@@ -64,7 +64,7 @@
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDoc, setDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global variables for Firebase instances
@@ -141,9 +141,11 @@
         // 获取 HTML 元素
         const taskForm = document.getElementById('task-form');
         const taskList = document.getElementById('task-list');
-        const shopItemList = document.getElementById('shop-items');
+        const publicShopItemList = document.getElementById('public-shop-items');
+        const privateShopItemList = document.getElementById('private-shop-items');
         const myInfoContainer = document.getElementById('my-info');
-        const addShopItemForm = document.getElementById('add-shop-item-form');
+        const addPublicShopItemForm = document.getElementById('add-public-shop-item-form');
+        const addPrivateShopItemForm = document.getElementById('add-private-shop-item-form');
         const shopItemNameInput = document.getElementById('shop-item-name');
         const shopItemPointsInput = document.getElementById('shop-item-points');
         const shopItemImageInput = document.getElementById('shop-item-image');
@@ -335,16 +337,61 @@
             });
         }
         
-        // Firestore 数据监听器 - 商城商品
-        function fetchShopItems() {
+        // Firestore 数据监听器 - 公共商城商品
+        function fetchPublicShopItems() {
             if (!authStateReady) return;
             const shopCollectionRef = collection(db, `artifacts/${appId}/public/data/shop_items`);
-
-            // 检查并添加初始商品
-            checkAndAddInitialShopItems(shopCollectionRef);
-
             onSnapshot(shopCollectionRef, (querySnapshot) => {
-                shopItemList.innerHTML = '';
+                publicShopItemList.innerHTML = '';
+                querySnapshot.forEach((doc) => {
+                    const item = doc.data();
+                    const itemId = doc.id;
+                    const itemElement = document.createElement('div');
+                    itemElement.classList.add('bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'flex', 'flex-col', 'items-center', 'space-y-4');
+                    itemElement.innerHTML = `
+                        <img src="${item.image}" alt="${item.name}" class="rounded-lg object-cover w-full h-40">
+                        <h3 class="font-bold text-lg">${item.name}</h3>
+                        <p class="text-gray-600">${item.points} 积分</p>
+                        <button data-item-id="${itemId}" data-item-name="${item.name}" data-item-points="${item.points}" class="buy-item-btn w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
+                            兑换
+                        </button>
+                    `;
+                    publicShopItemList.appendChild(itemElement);
+                });
+                
+                // 绑定公共商品兑换按钮事件
+                document.querySelectorAll('#public-shop-items .buy-item-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const itemId = e.target.dataset.itemId;
+                        const itemName = e.target.dataset.itemName;
+                        const itemPoints = parseInt(e.target.dataset.itemPoints);
+                        
+                        const userPointsRef = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
+                        const userPointsDoc = await getDoc(userPointsRef);
+                        const currentPoints = userPointsDoc.data().currentPoints || 0;
+
+                        if (currentPoints >= itemPoints) {
+                            await updateDoc(userPointsRef, {
+                                currentPoints: currentPoints - itemPoints,
+                                itemsRedeemed: [...(userPointsDoc.data().itemsRedeemed || []), { name: itemName, points: itemPoints, date: new Date() }]
+                            });
+                            showModal('兑换成功', '您已成功兑换 ' + itemName + '!', false);
+                        } else {
+                            showModal('兑换失败', '您的积分不足，无法兑换。', false);
+                        }
+                    });
+                });
+            }, (error) => {
+                console.error("从 Firestore 获取公共商城商品失败:", error);
+            });
+        }
+        
+        // Firestore 数据监听器 - 私人商城商品
+        function fetchPrivateShopItems() {
+            if (!authStateReady || !userId) return;
+            const shopCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/private_shop_items`);
+            onSnapshot(shopCollectionRef, (querySnapshot) => {
+                privateShopItemList.innerHTML = '';
                 querySnapshot.forEach((doc) => {
                     const item = doc.data();
                     const itemId = doc.id;
@@ -362,11 +409,11 @@
                             <button data-item-id="${itemId}" class="delete-item-btn bg-red-500 text-white text-sm py-1 px-2 rounded-lg hover:bg-red-600 transition-colors">删除</button>
                         </div>
                     `;
-                    shopItemList.appendChild(itemElement);
+                    privateShopItemList.appendChild(itemElement);
                 });
-
-                // 绑定按钮事件
-                document.querySelectorAll('.buy-item-btn').forEach(btn => {
+                
+                // 绑定私人商品按钮事件
+                document.querySelectorAll('#private-shop-items .buy-item-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const itemId = e.target.dataset.itemId;
                         const itemName = e.target.dataset.itemName;
@@ -388,7 +435,7 @@
                     });
                 });
                 
-                document.querySelectorAll('.edit-item-btn').forEach(btn => {
+                document.querySelectorAll('#private-shop-items .edit-item-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const itemId = e.target.dataset.itemId;
                         const newPoints = prompt("请输入新的所需积分:");
@@ -396,7 +443,7 @@
                             const userPointsRef = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
                             const userPointsDoc = await getDoc(userPointsRef);
                             const currentPoints = userPointsDoc.data().currentPoints || 0;
-                            const itemRef = doc(db, `artifacts/${appId}/public/data/shop_items/${itemId}`);
+                            const itemRef = doc(db, `artifacts/${appId}/users/${userId}/private_shop_items/${itemId}`);
                             const itemDoc = await getDoc(itemRef);
                             const oldPoints = itemDoc.data().points;
                             const deduction = Math.ceil(oldPoints * 0.1);
@@ -414,10 +461,10 @@
                     });
                 });
 
-                document.querySelectorAll('.delete-item-btn').forEach(btn => {
+                document.querySelectorAll('#private-shop-items .delete-item-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const itemId = e.target.dataset.itemId;
-                        const itemRef = doc(db, `artifacts/${appId}/public/data/shop_items/${itemId}`);
+                        const itemRef = doc(db, `artifacts/${appId}/users/${userId}/private_shop_items/${itemId}`);
                         const itemDoc = await getDoc(itemRef);
                         const itemData = itemDoc.data();
                         const deduction = Math.ceil(itemData.points * 0.1);
@@ -438,36 +485,24 @@
                     });
                 });
             }, (error) => {
-                console.error("从 Firestore 获取商城商品失败:", error);
+                console.error("从 Firestore 获取私人商城商品失败:", error);
             });
         }
         
-        // 检查并添加初始商品
-        async function checkAndAddInitialShopItems(shopCollectionRef) {
-            const snapshot = await getDocs(shopCollectionRef);
-             if (snapshot.size === 0) {
-                 await addDoc(shopCollectionRef, {
-                    name: '奶茶',
-                    points: 1,
-                    image: 'https://placehold.co/300x200/e5e7eb/000000?text=奶茶',
-                 });
-             }
-        }
-
         // 商城添加商品
-        addShopItemForm.addEventListener('submit', async (e) => {
+        addPrivateShopItemForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!authStateReady) return;
-            const shopItemRef = collection(db, `artifacts/${appId}/public/data/shop_items`);
+            const shopItemRef = collection(db, `artifacts/${appId}/users/${userId}/private_shop_items`);
             const newItem = {
                 name: shopItemNameInput.value,
                 points: parseInt(shopItemPointsInput.value),
-                image: shopItemImageInput.value || "https://placehold.co/200x200/e5e7eb/000000?text=Mate",
+                image: shopItemImageInput.value || `https://placehold.co/200x200/e5e7eb/000000?text=${shopItemNameInput.value.substring(0, 3)}`,
             };
             try {
                 await addDoc(shopItemRef, newItem);
                 showModal('添加成功', '商品添加成功！', false);
-                addShopItemForm.reset();
+                addPrivateShopItemForm.reset();
             } catch (error) {
                 console.error("添加商品失败:", error);
                 showModal('添加失败', '商品添加失败，请重试。', false);
@@ -511,6 +546,20 @@
             });
         }
         
+        // 用户登出
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                // 登出后重置UI，并显示登录模态框
+                document.getElementById('app-container').classList.add('hidden');
+                document.getElementById('login-modal').style.display = 'flex';
+                userId = null;
+                authStateReady = false;
+            } catch (error) {
+                showModal('登出失败', '登出失败，请稍后再试。', false);
+            }
+        });
+        
         // 核心初始化逻辑
         function initializeAppAndAuth() {
             // Check if firebaseConfig is defined
@@ -545,7 +594,7 @@
                                 currentPoints: 0,
                                 totalEarnedPoints: 0,
                                 lastSettlementDate: new Date(),
-                                avatar: `https://placehold.co/128x128/bfdbfe/ffffff?text=${userId.substring(0, 3)}}`,
+                                avatar: `https://placehold.co/128x128/bfdbfe/ffffff?text=${userId.substring(0, 3)}`,
                                 itemsRedeemed: [],
                             }, { merge: true });
                         }
@@ -553,25 +602,19 @@
                         checkAndPerformSettlement();
                         
                         fetchTasks();
-                        fetchShopItems();
+                        fetchPublicShopItems();
+                        fetchPrivateShopItems();
                         fetchMyInfo();
                         updateWeeklyDisplay();
                         updateTaskFormStatus();
                         
                         document.getElementById('app-container').classList.remove('hidden');
                         document.getElementById('loading-container').classList.add('hidden');
+                        document.getElementById('login-modal').style.display = 'none';
                     } else {
-                        console.log("用户未登录，尝试登录...");
-                        try {
-                            if (initialAuthToken) {
-                                await signInWithCustomToken(auth, initialAuthToken);
-                            } else {
-                                await signInAnonymously(auth);
-                            }
-                        } catch (error) {
-                            console.error("Firebase 登录失败:", error);
-                            showModal("登录失败", `无法登录到Firebase: ${error.message}`, false);
-                        }
+                        console.log("用户未登录，显示登录界面...");
+                        document.getElementById('loading-container').classList.add('hidden');
+                        document.getElementById('login-modal').style.display = 'flex';
                     }
                 });
 
@@ -598,12 +641,86 @@
         <div class="loading-spinner"></div>
     </div>
 
+    <!-- 登录/注册模态框 -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="login-title" class="text-2xl font-bold mb-4">登录或注册</h3>
+            <p id="login-error-message" class="text-red-500 mb-4"></p>
+            <form id="auth-form" class="space-y-4">
+                <div>
+                    <input type="email" id="auth-email" placeholder="邮箱" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <input type="password" id="auth-password" placeholder="密码" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button type="submit" id="auth-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                    登录
+                </button>
+                <div class="text-sm mt-4">
+                    <a href="#" id="toggle-auth-mode" class="text-blue-600 hover:underline">没有账号？点击注册</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        const loginModal = document.getElementById('login-modal');
+        const authForm = document.getElementById('auth-form');
+        const authEmail = document.getElementById('auth-email');
+        const authPassword = document.getElementById('auth-password');
+        const authBtn = document.getElementById('auth-btn');
+        const toggleAuthMode = document.getElementById('toggle-auth-mode');
+        const loginTitle = document.getElementById('login-title');
+        const loginErrorMessage = document.getElementById('login-error-message');
+        
+        let isLoginMode = true;
+
+        toggleAuthMode.addEventListener('click', (e) => {
+            e.preventDefault();
+            isLoginMode = !isLoginMode;
+            if (isLoginMode) {
+                loginTitle.textContent = '登录';
+                authBtn.textContent = '登录';
+                toggleAuthMode.textContent = '没有账号？点击注册';
+            } else {
+                loginTitle.textContent = '注册';
+                authBtn.textContent = '注册';
+                toggleAuthMode.textContent = '已有账号？点击登录';
+            }
+            loginErrorMessage.textContent = '';
+        });
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = authEmail.value;
+            const password = authPassword.value;
+            
+            try {
+                loginErrorMessage.textContent = '';
+                if (isLoginMode) {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                }
+                loginModal.style.display = 'none';
+            } catch (error) {
+                loginErrorMessage.textContent = error.message;
+            }
+        });
+    </script>
+
+
     <!-- 整个应用的容器，初始隐藏 -->
     <div id="app-container" class="hidden bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">Mate</h1>
-            <p class="text-gray-500">用积分管理你的效率！</p>
-            <p id="season-week" class="text-lg font-bold text-gray-600 mt-2"></p>
+        <header class="flex justify-between items-center mb-4">
+            <div>
+                <h1 class="text-4xl font-bold text-gray-800">Mate</h1>
+                <p class="text-gray-500">用积分管理你的效率！</p>
+                <p id="season-week" class="text-lg font-bold text-gray-600 mt-2"></p>
+            </div>
+            <button id="logout-btn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">登出</button>
         </header>
 
         <!-- 用户ID显示 -->
@@ -674,8 +791,8 @@
             <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">积分商城</h2>
             
             <div class="mb-8">
-                <h3 class="text-xl font-bold text-gray-700 mb-2">添加新商品</h3>
-                <form id="add-shop-item-form" class="space-y-4 p-4 rounded-lg border border-gray-300 bg-gray-50">
+                <h3 class="text-xl font-bold text-gray-700 mb-2">添加私人商品</h3>
+                <form id="add-private-shop-item-form" class="space-y-4 p-4 rounded-lg border border-gray-300 bg-gray-50">
                     <div>
                         <label for="shop-item-name" class="block text-sm font-medium text-gray-700 mb-1">商品名</label>
                         <input type="text" id="shop-item-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
@@ -694,8 +811,13 @@
                 </form>
             </div>
             
-            <h3 class="text-xl font-bold text-gray-700 mb-2">所有商品</h3>
-            <div id="shop-items" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <h3 class="text-xl font-bold text-gray-700 mb-2">公共商品</h3>
+            <div id="public-shop-items" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+                <!-- 商品会通过 JavaScript 动态添加到这里 -->
+            </div>
+            
+            <h3 class="text-xl font-bold text-gray-700 mb-2">我的商品</h3>
+            <div id="private-shop-items" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 <!-- 商品会通过 JavaScript 动态添加到这里 -->
             </div>
         </div>
