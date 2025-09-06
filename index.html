@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mate - 任务管理系统</title>
-  <!-- Tailwind -->
+  <title>Mate - 用积分管理你的效率！</title>
+  <link rel="icon" type="image/png" href="./a4.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
@@ -18,15 +18,13 @@
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
 
-  <!-- 加载中的提示 -->
   <div id="loading-container" class="loading-container">
     <div class="loading-spinner"></div>
   </div>
 
-  <!-- 登录/注册模态框 -->
   <div id="login-modal" class="modal">
     <div class="modal-content">
-      <h3 id="login-title" class="text-2xl font-bold mb-4">登录或注册</h3>
+      <h3 id="login-title" class="text-2xl font-bold mb-4">登录</h3>
       <p id="login-error-message" class="text-red-500 mb-4"></p>
       <form id="auth-form" class="space-y-4">
         <div>
@@ -48,9 +46,63 @@
     </div>
   </div>
 
-  <!-- 整个应用的容器，初始隐藏 -->
-  <div id="app-container" class="hidden bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full">
-    <header class="flex justify-between items-center mb-4">
+  <div id="intro-page" class="page active max-w-xl w-full text-center">
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+      <h1 class="text-6xl font-extrabold text-blue-600 mt-8 mb-12">Mate</h1>
+      <p class="text-lg text-gray-700 mb-8">
+        Mate 是一款帮助你高效管理任务的工具。通过将任务与积分系统相结合，鼓励你将目标分解并完成，从而获得奖励。用积分衡量你的努力，让每一个成就都变得有形。
+      </p>
+      <button id="intro-login-btn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition-colors">
+        立即登录
+      </button>
+    </div>
+  </div>
+
+  <div id="rules-page" class="page max-w-2xl w-full">
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+      <h2 class="text-3xl font-bold text-gray-800 mb-4 text-center">任务与积分规则</h2>
+      <button id="rules-back-btn" class="mb-4 text-gray-600 hover:text-blue-600 transition-colors">← 返回计划页面</button>
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-xl font-bold text-gray-700">1. 制定时间</h3>
+          <p class="text-gray-600 mt-2">
+            你可以在每周日晚上8点至下周一晚上8点期间制定下一周的任务计划。在这个时间段之外，任务表单将不可用，以确保你专注于本周已定的任务。
+          </p>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-gray-700">2. 任务分类与积分</h3>
+          <p class="text-gray-600 mt-2">
+            每项任务都根据重要性 (s/ns)、紧急性 (u/nu) 和难易度 (c/nc) 进行分类。不同的组合对应不同的积分奖励：
+          </p>
+          <ul class="list-disc list-inside mt-2 text-gray-600">
+            <li>重要、紧急、困难 (s-u-c)：<span class="font-bold text-blue-600">5分</span></li>
+            <li>不重要、紧急、困难 (ns-u-c)：<span class="font-bold text-blue-600">3分</span></li>
+            <li>重要、不紧急、困难 (s-nu-c)：<span class="font-bold text-blue-600">4分</span></li>
+            <li>重要、紧急、不困难 (s-u-nc)：<span class="font-bold text-blue-600">4分</span></li>
+            <li>不重要、不紧急、困难 (ns-nu-c)：<span class="font-bold text-blue-600">3分</span></li>
+            <li>不重要、紧急、不困难 (ns-u-nc)：<span class="font-bold text-blue-600">2分</span></li>
+            <li>重要、不紧急、不困难 (s-nu-nc)：<span class="font-bold text-blue-600">3分</span></li>
+            <li>不重要、不紧急、不困难 (ns-nu-nc)：<span class="font-bold text-blue-600">1分</span></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-gray-700">3. 每周结算与积分扣除</h3>
+          <p class="text-gray-600 mt-2">
+            系统会在每周日晚上8点自动进行结算。已完成任务的所有积分将被统计，并从中扣除 <span class="font-bold">10%</span> 作为平台参与费用。例如，如果你本周总共获得100分，最终将获得90分。
+          </p>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-gray-700">4. 私人商品管理费用</h3>
+          <p class="text-gray-600 mt-2">
+            为了维持商城秩序，修改或删除私人商品将收取其原积分价值 <span class="font-bold">10%</span> 的手续费（向上取整）。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="app-container" class="hidden bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full pb-20 md:pb-8">
+    <header id="main-header" class="flex justify-between items-center mb-4">
       <div>
         <h1 class="text-4xl font-bold text-gray-800">Mate</h1>
         <p class="text-gray-500">用积分管理你的效率！</p>
@@ -61,19 +113,16 @@
       </button>
     </header>
 
-    <!-- 用户ID显示 -->
     <div class="text-sm text-center text-gray-400 mb-4">
       <span id="user-id-display-header">正在登录...</span>
     </div>
 
-    <!-- 导航链接 -->
-    <nav class="flex justify-center space-x-6 mb-8">
-      <a href="#" data-page="plan-page" class="text-blue-600 font-medium border-b-2 border-blue-600 pb-1">计划页面</a>
-      <a href="#" data-page="shop-page" class="text-gray-500 hover:text-blue-600 transition-colors">商城页面</a>
-      <a href="#" data-page="my-page"   class="text-gray-500 hover:text-blue-600 transition-colors">我的页面</a>
+    <nav class="fixed inset-x-0 bottom-0 py-4 flex justify-center space-x-16 bg-white shadow-lg md:static md:bottom-auto md:bg-transparent md:shadow-none md:mb-8">
+      <a href="#" data-page="plan-page" class="text-blue-600 font-medium border-b-2 border-blue-600 pb-1">计划</a>
+      <a href="#" data-page="shop-page" class="text-gray-500 hover:text-blue-600 transition-colors">商城</a>
+      <a href="#" data-page="my-page"   class="text-gray-500 hover:text-blue-600 transition-colors">我的</a>
     </nav>
 
-    <!-- 计划页面 -->
     <div id="plan-page" class="page active">
       <form id="task-form" class="mb-8">
         <p id="task-form-status" class="text-center mb-4 text-sm font-medium"></p>
@@ -93,7 +142,8 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">紧急性 (u/nu)</label>
-              <select id="task-urgency" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select id="task-urgency" class="w-full px-4 py-2 border
+border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="u">紧急 (u)</option>
                 <option value="nu">不紧急 (nu)</option>
               </select>
@@ -111,14 +161,17 @@
           </button>
         </div>
       </form>
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold text-gray-800">本周任务列表</h2>
+        <a href="#" data-page="rules-page" class="text-blue-600 hover:underline">规则说明</a>
+      </div>
       <div>
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">本周任务列表</h2>
         <div id="task-list" class="space-y-4"></div>
       </div>
     </div>
 
-    <!-- 商城页面 -->
-    <div id="shop-page" class="page">
+    <div id="shop-page"
+class="page">
       <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">积分商城</h2>
 
       <div class="mb-8">
@@ -143,20 +196,21 @@
       </div>
 
       <h3 class="text-xl font-bold text-gray-700 mb-2">公共商品</h3>
-      <div id="public-shop-items" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8"></div>
+      <div id="public-shop-items" class="grid grid-cols-1 sm:grid-cols-2
+md:grid-cols-3 gap-6 mb-8"></div>
 
       <h3 class="text-xl font-bold text-gray-700 mb-2">我的商品</h3>
       <div id="private-shop-items" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
     </div>
 
-    <!-- 我的页面 -->
     <div id="my-page" class="page">
       <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">我的页面</h2>
 
       <div class="flex flex-col items-center space-y-4 mb-8">
         <img id="user-avatar" class="w-24 h-24 rounded-full border-4 border-white shadow-lg" alt="用户头像">
         <p class="text-lg font-bold text-gray-800">用户:
-          <span id="user-id-display-my" class="font-normal text-sm text-gray-500"></span>
+          <span
+id="user-id-display-my" class="font-normal text-sm text-gray-500"></span>
         </p>
         <div class="flex space-x-8">
           <div class="text-center">
@@ -175,7 +229,6 @@
     </div>
   </div>
 
-  <!-- 自定义模态框 -->
   <div id="my-modal" class="modal">
     <div class="modal-content">
       <h3 id="modal-title" class="text-2xl font-bold mb-4"></h3>
@@ -187,18 +240,16 @@
     </div>
   </div>
 
-  <!-- 统一模块脚本（务必放在页面末尾） -->
   <script type="module">
     import { initializeApp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import {
+import {
       getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
       onAuthStateChanged, signOut
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import {
+import {
       getFirestore, collection, addDoc, onSnapshot, doc, updateDoc,
       deleteDoc, getDoc, setDoc, query, where, getDocs
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
     // ---- Firebase 配置（你的项目） ----
     const firebaseConfig = {
       apiKey: "AIzaSyA0O3swBThy4KJIW_Y6slHiRlJtZS_9BZc",
@@ -209,7 +260,6 @@
       appId: "1:170057760460:web:2658e4f9b6b8172af0cc69",
       measurementId: "G-G342F6TYEX"
     };
-
     // ---- 初始化 ----
     setLogLevel('debug');
     const app = initializeApp(firebaseConfig);
@@ -219,22 +269,22 @@
 
     // ---- 常量/状态 ----
     let userId = null;
-    let authStateReady = false;
+let authStateReady = false;
 
     // 赛季/周数
-    const seasonEpoch = new Date('2024-09-01T00:00:00+08:00');
-    const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
+    const seasonEpoch = new Date('2025-09-01T00:00:00+08:00');
+const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
     const weeksPerSeason = 8;
-    function getSeasonAndWeek() {
+function getSeasonAndWeek() {
       const now = new Date();
-      const elapsedWeeks = Math.floor((now - seasonEpoch) / millisecondsPerWeek);
+const elapsedWeeks = Math.floor((now - seasonEpoch) / millisecondsPerWeek);
       const season = Math.floor(elapsedWeeks / weeksPerSeason) + 1;
-      const week = (elapsedWeeks % weeksPerSeason) + 1;
+const week = (elapsedWeeks % weeksPerSeason) + 1;
       return { season, week };
-    }
+}
     function updateWeeklyDisplay(){
       const {season, week} = getSeasonAndWeek();
-      document.getElementById('season-week').textContent = `第 ${season} 赛季 第 ${week} 周`;
+document.getElementById('season-week').textContent = `S${season} 赛季 第 ${week} 周`;
     }
 
     // 任务积分映射
@@ -242,138 +292,163 @@
       's-u-c': 5, 'ns-u-c': 3, 's-nu-c': 4, 's-u-nc': 4,
       'ns-nu-c': 3, 'ns-u-nc': 2, 's-nu-nc': 3, 'ns-nu-nc': 1,
     };
-
     // ---- 选择所有需要的 DOM（此脚本在页面末尾，元素已存在） ----
+    const loadingContainer = document.getElementById('loading-container');
     const loginModal = document.getElementById('login-modal');
+    const appContainer = document.getElementById('app-container');
+    const mainHeader = document.getElementById('main-header'); // 新增
+    const introPage = document.getElementById('intro-page');
+    const rulesPage = document.getElementById('rules-page');
+    const introLoginBtn = document.getElementById('intro-login-btn');
+    const rulesBackBtn = document.getElementById('rules-back-btn');
     const authForm = document.getElementById('auth-form');
     const authEmail = document.getElementById('auth-email');
-    const authPassword = document.getElementById('auth-password');
+const authPassword = document.getElementById('auth-password');
     const authBtn = document.getElementById('auth-btn');
     const toggleAuthMode = document.getElementById('toggle-auth-mode');
     const loginTitle = document.getElementById('login-title');
     const loginErrorMessage = document.getElementById('login-error-message');
-
-    const taskForm = document.getElementById('task-form');
+const taskForm = document.getElementById('task-form');
     const taskList = document.getElementById('task-list');
     const publicShopItemList = document.getElementById('public-shop-items');
     const privateShopItemList = document.getElementById('private-shop-items');
     const addPrivateShopItemForm = document.getElementById('add-private-shop-item-form');
-    const shopItemNameInput = document.getElementById('shop-item-name');
+const shopItemNameInput = document.getElementById('shop-item-name');
     const shopItemPointsInput = document.getElementById('shop-item-points');
     const shopItemImageInput = document.getElementById('shop-item-image');
     const currentPointsDisplay = document.getElementById('current-points');
     const totalPointsDisplay = document.getElementById('total-points');
-    const userAvatar = document.getElementById('user-avatar');
+const userAvatar = document.getElementById('user-avatar');
     const redeemedItemsList = document.getElementById('redeemed-items-list');
 
     const userIdDisplayHeader = document.getElementById('user-id-display-header');
     const userIdDisplayMy = document.getElementById('user-id-display-my');
-
-    // 模态框元素
-    const modal = document.getElementById('my-modal');
+const modal = document.getElementById('my-modal');
     const modalTitle = document.getElementById('modal-title');
     const modalMessage = document.getElementById('modal-message');
-    const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+const modalConfirmBtn = document.getElementById('modal-confirm-btn');
     const modalCancelBtn = document.getElementById('modal-cancel-btn');
 
     function showModal(title, message, isConfirm=false, onConfirm=null){
       modalTitle.textContent = title;
-      modalMessage.textContent = message;
+modalMessage.textContent = message;
       modal.style.display = 'flex';
       if(isConfirm){
         modalConfirmBtn.style.display = 'inline-block';
         modalCancelBtn.style.display = 'inline-block';
-        modalConfirmBtn.onclick = async () => { onConfirm && (await onConfirm()); hideModal(); };
-      } else {
+modalConfirmBtn.onclick = async () => { onConfirm && (await onConfirm()); hideModal(); };
+} else {
         modalConfirmBtn.style.display = 'none';
         modalCancelBtn.style.display = 'none';
         modalConfirmBtn.onclick = null;
-      }
+}
     }
     function hideModal(){
       modal.style.display = 'none';
-      modalConfirmBtn.onclick = null;
+modalConfirmBtn.onclick = null;
     }
     modalCancelBtn.addEventListener('click', hideModal);
 
-    // 顶部导航切换
-    document.querySelectorAll('nav a').forEach(link=>{
-      link.addEventListener('click', (e)=>{
+    // 新增：页面切换函数
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      // 控制主页面的头部显示/隐藏
+      if(pageId === 'plan-page' || pageId === 'shop-page' || pageId === 'my-page'){
+          mainHeader.style.display = 'flex';
+      } else {
+          mainHeader.style.display = 'none';
+      }
+    }
+
+    // 新增：处理页面导航
+    document.querySelectorAll('[data-page]').forEach(link => {
+      link.addEventListener('click', (e) => {
         e.preventDefault();
         const targetPage = e.currentTarget.dataset.page;
-        document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-        document.getElementById(targetPage).classList.add('active');
-
-        document.querySelectorAll('nav a').forEach(a=>{
-          a.classList.remove('border-blue-600','text-blue-600');
-          a.classList.add('text-gray-500');
-        });
-        e.currentTarget.classList.remove('text-gray-500');
-        e.currentTarget.classList.add('text-blue-600','border-b-2','border-blue-600');
+        showPage(targetPage);
+        
+        // 更新底部导航链接的样式，仅针对 app-container 内的导航
+        if (e.currentTarget.closest('#app-container')) {
+          document.querySelectorAll('#app-container nav a').forEach(a => {
+            a.classList.remove('border-blue-600', 'text-blue-600');
+            a.classList.add('text-gray-500');
+          });
+          e.currentTarget.classList.remove('text-gray-500');
+          e.currentTarget.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+        }
       });
+    });
+
+    // 新增：介绍页登录按钮
+    introLoginBtn.addEventListener('click', ()=>{
+      loginModal.style.display = 'flex';
+    });
+    
+    // 新增：规则页返回按钮
+    rulesBackBtn.addEventListener('click', ()=>{
+      showPage('plan-page');
     });
 
     // 任务表单开放时间提示
     function updateTaskFormStatus() {
       const now = new Date();
-      const day = now.getDay();  // 0=Sunday
+const day = now.getDay();  // 0=Sunday
       const hour = now.getHours();
       const msg = document.getElementById('task-form-status');
-      const isPlanningWindow = (day === 0 && hour >= 20) || (day === 1 && hour < 20);
-      if (isPlanningWindow) {
+const isPlanningWindow = (day === 0 && hour >= 20) || (day === 1 && hour < 20);
+if (isPlanningWindow) {
         taskForm.classList.remove('opacity-50','pointer-events-none');
         msg.textContent = '现在是制定下周任务的时间。';
         msg.classList.add('text-green-600'); msg.classList.remove('text-red-600');
-      } else {
+} else {
         taskForm.classList.add('opacity-50','pointer-events-none');
-        msg.textContent = '制定任务的时间已过。请在下周日晚8点至下周一晚8点期间进行。';
+        msg.textContent = '制定任务的时间已过。请在周日晚8点至下周一晚8点期间进行。';
         msg.classList.add('text-red-600'); msg.classList.remove('text-green-600');
-      }
+}
     }
 
     // 每周结算
     async function checkAndPerformSettlement() {
       if (!authStateReady || !userId) return;
-      const now = new Date();
+const now = new Date();
       if (now.getDay() !== 0 || now.getHours() < 20) return;
       const userPointsRef = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
-      const userDoc = await getDoc(userPointsRef);
+const userDoc = await getDoc(userPointsRef);
       if (!userDoc.exists()) return;
       const lastSettlementDate = userDoc.data().lastSettlementDate?.toDate?.() ?? new Date(0);
       if (now <= lastSettlementDate) return;
-      await performWeeklySettlement();
+await performWeeklySettlement();
     }
     async function performWeeklySettlement(){
       const tasksRef = collection(db, `artifacts/${appId}/users/${userId}/tasks`);
-      const completedTasksQuery = query(tasksRef, where('status','==','completed'));
+const completedTasksQuery = query(tasksRef, where('status','==','completed'));
       const snap = await getDocs(completedTasksQuery);
       let totalEarned = 0;
-      snap.forEach(d=>{ totalEarned += d.data().points || 0; });
+snap.forEach(d=>{ totalEarned += d.data().points || 0; });
       const deduction = Math.floor(totalEarned * 0.1);
       const netPoints = totalEarned - deduction;
-
-      const userPointsRef = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
+const userPointsRef = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
       const pointsDoc = await getDoc(userPointsRef);
       const currentPoints = pointsDoc.data().currentPoints || 0;
-      const totalEarnedAll = pointsDoc.data().totalEarnedPoints || 0;
+const totalEarnedAll = pointsDoc.data().totalEarnedPoints || 0;
 
       await updateDoc(userPointsRef, {
         currentPoints: currentPoints + netPoints,
         totalEarnedPoints: totalEarnedAll + totalEarned,
         lastSettlementDate: new Date()
       });
-
-      const summaryRef = collection(db, `artifacts/${appId}/users/${userId}/weekly_summaries`);
+const summaryRef = collection(db, `artifacts/${appId}/users/${userId}/weekly_summaries`);
       await addDoc(summaryRef, { date:new Date(), totalEarned, deduction, netGain: netPoints });
 
       await Promise.all(snap.docs.map(d=>deleteDoc(d.ref)));
-      showModal('每周结算完成', `本周获得 ${totalEarned} 分，扣除 ${deduction} 分，净得 ${netPoints} 分。`);
+showModal('每周结算完成', `本周获得 ${totalEarned} 分，扣除 ${deduction} 分，净得 ${netPoints} 分。`);
     }
 
     // 监听任务
     function fetchTasks(){
       if (!authStateReady || !userId) return;
-      const tasksCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/tasks`);
+const tasksCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/tasks`);
       onSnapshot(tasksCollectionRef, (qs)=>{
         taskList.innerHTML = '';
         qs.forEach((d)=>{
@@ -396,20 +471,20 @@
         document.querySelectorAll('.complete-task-btn').forEach(btn=>{
           btn.addEventListener('click', async (e)=>{
             const id = e.currentTarget.dataset.taskId;
-            const ref = doc(db, `artifacts/${appId}/users/${userId}/tasks/${id}`);
+const ref = doc(db, `artifacts/${appId}/users/${userId}/tasks/${id}`);
             const snap = await getDoc(ref);
-            if (snap.exists() && snap.data().status !== 'completed'){
+if (snap.exists() && snap.data().status !== 'completed'){
               await updateDoc(ref, { status:'completed' });
-            }
+}
           });
         });
       }, (err)=>console.error('获取任务失败:', err));
-    }
+}
 
     // 我的信息
     function fetchMyInfo(){
       if (!authStateReady || !userId) return;
-      const ref = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
+const ref = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
       onSnapshot(ref, (docSnap)=>{
         if (!docSnap.exists()) return;
         const data = docSnap.data();
@@ -424,12 +499,12 @@
           redeemedItemsList.appendChild(li);
         });
       }, (err)=>console.error('获取用户信息失败:', err));
-    }
+}
 
     // 公共商品
     function fetchPublicShopItems(){
       if (!authStateReady) return;
-      const ref = collection(db, `artifacts/${appId}/public/data/shop_items`);
+const ref = collection(db, `artifacts/${appId}/public/data/shop_items`);
       onSnapshot(ref, (qs)=>{
         publicShopItemList.innerHTML = '';
         qs.forEach((d)=>{
@@ -437,7 +512,8 @@
           const el = document.createElement('div');
           el.className = 'bg-white rounded-lg shadow-md p-4 flex flex-col items-center space-y-4';
           el.innerHTML = `
-            <img src="${item.image}" alt="${item.name}" class="rounded-lg object-cover w-full h-40">
+            <img src="${item.image}" alt="${item.name}"
+class="rounded-lg object-cover w-full h-40">
             <h3 class="font-bold text-lg">${item.name}</h3>
             <p class="text-gray-600">${item.points} 积分</p>
             <button data-item-id="${id}" data-item-name="${item.name}" data-item-points="${item.points}"
@@ -447,28 +523,28 @@
         document.querySelectorAll('#public-shop-items .buy-item-btn').forEach(btn=>{
           btn.addEventListener('click', async (e)=>{
             const itemName = e.currentTarget.dataset.itemName;
-            const itemPoints = parseInt(e.currentTarget.dataset.itemPoints);
+const itemPoints = parseInt(e.currentTarget.dataset.itemPoints);
             const userPointsRef = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
             const userPointsDoc = await getDoc(userPointsRef);
             const currentPoints = userPointsDoc.data().currentPoints || 0;
-            if (currentPoints >= itemPoints){
+if (currentPoints >= itemPoints){
               await updateDoc(userPointsRef, {
                 currentPoints: currentPoints - itemPoints,
                 itemsRedeemed: [...(userPointsDoc.data().itemsRedeemed || []), { name:itemName, points:itemPoints, date:new Date() }]
               });
-              showModal('兑换成功', `您已成功兑换 ${itemName}！`);
+showModal('兑换成功', `您已成功兑换 ${itemName}！`);
             } else {
               showModal('兑换失败', '积分不足，无法兑换。');
-            }
+}
           });
         });
       }, (err)=>console.error('获取公共商品失败:', err));
-    }
+}
 
     // 私人商品
     function fetchPrivateShopItems(){
       if (!authStateReady || !userId) return;
-      const ref = collection(db, `artifacts/${appId}/users/${userId}/private_shop_items`);
+const ref = collection(db, `artifacts/${appId}/users/${userId}/private_shop_items`);
       onSnapshot(ref, (qs)=>{
         privateShopItemList.innerHTML = '';
         qs.forEach((d)=>{
@@ -476,7 +552,8 @@
           const el = document.createElement('div');
           el.className = 'bg-white rounded-lg shadow-md p-4 flex flex-col items-center space-y-4';
           el.innerHTML = `
-            <img src="${item.image}" alt="${item.name}" class="rounded-lg object-cover w-full h-40">
+            <img src="${item.image}" alt="${item.name}"
+class="rounded-lg object-cover w-full h-40">
             <h3 class="font-bold text-lg">${item.name}</h3>
             <p class="text-gray-600">${item.points} 积分</p>
             <button data-item-id="${id}" data-item-name="${item.name}" data-item-points="${item.points}"
@@ -485,7 +562,7 @@
               <button data-item-id="${id}" class="edit-item-btn bg-yellow-500 text-white text-sm py-1 px-2 rounded-lg hover:bg-yellow-600 transition-colors">修改</button>
               <button data-item-id="${id}" class="delete-item-btn bg-red-500 text-white text-sm py-1 px-2 rounded-lg hover:bg-red-600 transition-colors">删除</button>
             </div>`;
-          privateShopItemList.appendChild(el);
+privateShopItemList.appendChild(el);
         });
 
         // 兑换
@@ -495,7 +572,8 @@
             const itemPoints = parseInt(e.currentTarget.dataset.itemPoints);
             const userPointsRef = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
             const userPointsDoc = await getDoc(userPointsRef);
-            const currentPoints = userPointsDoc.data().currentPoints || 0;
+            const currentPoints
+= userPointsDoc.data().currentPoints || 0;
             if (currentPoints >= itemPoints){
               await updateDoc(userPointsRef, {
                 currentPoints: currentPoints - itemPoints,
@@ -507,7 +585,6 @@
             }
           });
         });
-
         // 修改
         document.querySelectorAll('#private-shop-items .edit-item-btn').forEach(btn=>{
           btn.addEventListener('click', async (e)=>{
@@ -515,7 +592,8 @@
             const newPoints = prompt("请输入新的所需积分:");
             if (!newPoints || isNaN(parseInt(newPoints))) return;
             const userPointsRef = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
-            const userPointsDoc = await getDoc(userPointsRef);
+            const userPointsDoc = await
+getDoc(userPointsRef);
             const currentPoints = userPointsDoc.data().currentPoints || 0;
             const itemRef = doc(db, `artifacts/${appId}/users/${userId}/private_shop_items/${itemId}`);
             const itemDoc = await getDoc(itemRef);
@@ -524,14 +602,13 @@
             if (currentPoints >= fee){
               showModal('确认修改', `确认要修改商品吗？将扣除 ${fee} 积分作为手续费。`, true, async ()=>{
                 await updateDoc(userPointsRef, { currentPoints: currentPoints - fee });
-                await updateDoc(itemRef, { points: parseInt(newPoints) });
+await updateDoc(itemRef, { points: parseInt(newPoints) });
               });
             } else {
               showModal('修改失败', '积分不足以支付修改手续费。');
-            }
+}
           });
         });
-
         // 删除
         document.querySelectorAll('#private-shop-items .delete-item-btn').forEach(btn=>{
           btn.addEventListener('click', async (e)=>{
@@ -549,11 +626,11 @@
               });
             } else {
               showModal('删除失败', '积分不足以支付删除手续费。');
-            }
+}
           });
         });
       }, (err)=>console.error('获取私人商品失败:', err));
-    }
+}
 
     // 添加私人商品
     addPrivateShopItemForm?.addEventListener('submit', async (e)=>{
@@ -568,7 +645,6 @@
       try{ await addDoc(ref, newItem); showModal('添加成功', '商品添加成功！'); addPrivateShopItemForm.reset(); }
       catch(err){ console.error('添加商品失败:', err); showModal('添加失败', '请重试。'); }
     });
-
     // 添加任务
     taskForm?.addEventListener('submit', async (e)=>{
       e.preventDefault();
@@ -580,17 +656,17 @@
       if (!description) return;
       const type = `${significance}-${urgency}-${complexity}`;
       const points = pointMap[type] || 0;
-      const newTask = { description, type, points, status:'pending', createdAt:new Date() };
+      const newTask = { description, type, points,
+status:'pending', createdAt:new Date() };
       try{
         const ref = collection(db, `artifacts/${appId}/users/${userId}/tasks`);
         await addDoc(ref, newTask);
         taskForm.reset();
       }catch(err){ console.error('保存任务失败:', err); }
     });
-
     // 登录/注册切换 + 提交
     let isLoginMode = true;
-    toggleAuthMode.addEventListener('click', (e)=>{
+toggleAuthMode.addEventListener('click', (e)=>{
       e.preventDefault();
       isLoginMode = !isLoginMode;
       if (isLoginMode){
@@ -602,8 +678,7 @@
       }
       loginErrorMessage.textContent = '';
     });
-
-    authForm.addEventListener('submit', async (e)=>{
+authForm.addEventListener('submit', async (e)=>{
       e.preventDefault();
       const email = authEmail.value.trim();
       const password = authPassword.value;
@@ -619,17 +694,16 @@
         loginErrorMessage.textContent = err.message;
       }
     });
-
     // 登出
     document.getElementById('logout-btn').addEventListener('click', async ()=>{
       try{
         await signOut(auth);
-        document.getElementById('app-container').classList.add('hidden');
-        loginModal.style.display = 'flex';
+        appContainer.classList.add('hidden');
+        loginModal.style.display = 'none';
+        showPage('intro-page'); // 登出后返回介绍页
         userId = null; authStateReady = false;
       }catch{ showModal('登出失败', '请稍后再试。'); }
     });
-
     // 启动：监听登录状态并装载数据
     function initializeAppAndAuth(){
       onAuthStateChanged(auth, async (user)=>{
@@ -640,7 +714,8 @@
           userIdDisplayMy.textContent = userId;
 
           const userPointsRef = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
-          const userDoc = await getDoc(userPointsRef);
+          const userDoc = await
+getDoc(userPointsRef);
           if (!userDoc.exists()){
             await setDoc(userPointsRef, {
               currentPoints: 0, totalEarnedPoints: 0, lastSettlementDate: new Date(),
@@ -651,13 +726,14 @@
           checkAndPerformSettlement();
           fetchTasks(); fetchPublicShopItems(); fetchPrivateShopItems(); fetchMyInfo();
           updateWeeklyDisplay(); updateTaskFormStatus();
-
-          document.getElementById('app-container').classList.remove('hidden');
-          document.getElementById('loading-container').classList.add('hidden');
+          appContainer.classList.remove('hidden');
+          loadingContainer.classList.add('hidden');
           loginModal.style.display = 'none';
+          showPage('plan-page'); // 登录成功后直接跳转到计划页面
         } else {
-          document.getElementById('loading-container').classList.add('hidden');
-          loginModal.style.display = 'flex';
+          loadingContainer.classList.add('hidden');
+          loginModal.style.display = 'none';
+          showPage('intro-page'); // 未登录时显示介绍页
         }
       });
     }
