@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mate - 用积分管理你的效率！</title>
-  <link rel="icon" type="image/png" href="./a4.png">
+  <link rel="icon" type="image/png" href="./icon.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
@@ -205,7 +205,22 @@ md:grid-cols-3 gap-6 mb-8"></div>
     </div>
 
     <div id="my-page" class="page">
-      <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">我的页面</h2>
+      <div class="flex items-center justify-center mb-8">
+          <div id="nickname-display-area" class="flex items-center space-x-2">
+              <h2 id="nickname-display" class="text-3xl font-bold text-gray-800">未设置昵称</h2>
+              <button id="edit-nickname-btn" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                      <path d="M5.433 13.905l5.132-5.132a.75.75 0 011.06 1.06L6.493 14.965a.75.75 0 01-1.06-1.06zM13.626 5.864l1.83 1.83a2.25 2.25 0 003.182-3.182l-1.83-1.83a2.25 2.25 0 00-3.182 3.182zM4.685 14.897l-3.32 3.32a.75.75 0 00.75.75l3.32-3.32a.75.75 0 00-.75-.75z" />
+                  </svg>
+              </button>
+          </div>
+          <div id="nickname-edit-area" class="hidden flex items-center space-x-2 w-full max-w-sm">
+              <input type="text" id="nickname-input" placeholder="输入新昵称" class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <button id="save-nickname-btn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                  保存
+              </button>
+          </div>
+      </div>
 
       <div class="flex flex-col items-center space-y-4 mb-8">
         <img id="user-avatar" class="w-24 h-24 rounded-full border-4 border-white shadow-lg" alt="用户头像">
@@ -231,13 +246,18 @@ id="user-id-display-my" class="font-normal text-sm text-gray-500"></span>
   </div>
 
   <div id="my-modal" class="modal">
-    <div class="modal-content">
-      <h3 id="modal-title" class="text-2xl font-bold mb-4"></h3>
-      <p id="modal-message" class="text-gray-700 mb-6"></p>
-      <div class="flex justify-center space-x-4">
-        <button id="modal-cancel-btn" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">取消</button>
-        <button id="modal-confirm-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">确定</button>
-      </div>
+    <div class="modal-content relative">
+        <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <h3 id="modal-title" class="text-2xl font-bold mb-4"></h3>
+        <p id="modal-message" class="text-gray-700 mb-6"></p>
+        <div class="flex justify-center space-x-4">
+            <button id="modal-cancel-btn" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">取消</button>
+            <button id="modal-confirm-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">确定</button>
+        </div>
     </div>
   </div>
 
@@ -330,25 +350,38 @@ const modal = document.getElementById('my-modal');
 const modalConfirmBtn = document.getElementById('modal-confirm-btn');
     const modalCancelBtn = document.getElementById('modal-cancel-btn');
 
+    // 选择关闭按钮
+    const closeModalBtn = document.getElementById('close-modal-btn');
+
     function showModal(title, message, isConfirm=false, onConfirm=null){
       modalTitle.textContent = title;
-modalMessage.textContent = message;
+      modalMessage.textContent = message;
       modal.style.display = 'flex';
+      
+      // 每次显示时都确保关闭按钮可见
+      closeModalBtn.style.display = 'inline-block';
+
       if(isConfirm){
         modalConfirmBtn.style.display = 'inline-block';
         modalCancelBtn.style.display = 'inline-block';
-modalConfirmBtn.onclick = async () => { onConfirm && (await onConfirm()); hideModal(); };
-} else {
+        modalConfirmBtn.onclick = async () => { onConfirm && (await onConfirm()); hideModal(); };
+      } else {
         modalConfirmBtn.style.display = 'none';
         modalCancelBtn.style.display = 'none';
         modalConfirmBtn.onclick = null;
-}
+      }
     }
+
     function hideModal(){
       modal.style.display = 'none';
-modalConfirmBtn.onclick = null;
+      modalConfirmBtn.onclick = null;
+      // 隐藏弹窗时也隐藏关闭按钮
+      closeModalBtn.style.display = 'none';
     }
+
     modalCancelBtn.addEventListener('click', hideModal);
+    // 新增：为关闭按钮添加事件监听器
+    closeModalBtn.addEventListener('click', hideModal);
 
     // 新增：页面切换函数
     function showPage(pageId) {
@@ -400,7 +433,7 @@ const day = now.getDay();  // 0=Sunday
 const isPlanningWindow = (day === 0 && hour >= 20) || (day === 1 && hour < 20);
 if (isPlanningWindow) {
         taskForm.classList.remove('opacity-50','pointer-events-none');
-        msg.textContent = '现在是制定下周任务的时间。';
+        msg.textContent = '现在是制定任务的时间。';
         msg.classList.add('text-green-600'); msg.classList.remove('text-red-600');
 } else {
         taskForm.classList.add('opacity-50','pointer-events-none');
@@ -412,14 +445,25 @@ if (isPlanningWindow) {
     // 每周结算
     async function checkAndPerformSettlement() {
       if (!authStateReady || !userId) return;
-const now = new Date();
-      if (now.getDay() !== 0 || now.getHours() < 20) return;
+      const now = new Date();
+      // 只在周日晚上8点或之后进行结算
+      if (!( (now.getDay() === 0 && now.getHours() >= 20) || (now.getDay() === 1 && now.getHours() < 20) )) return;
       const userPointsRef = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
-const userDoc = await getDoc(userPointsRef);
+      const userDoc = await getDoc(userPointsRef);
       if (!userDoc.exists()) return;
       const lastSettlementDate = userDoc.data().lastSettlementDate?.toDate?.() ?? new Date(0);
-      if (now <= lastSettlementDate) return;
-await performWeeklySettlement();
+      
+      // 计算本周结算窗口的开始时间（即最近的周日晚上8点）
+      const startOfSettlementWindow = new Date(now);
+      startOfSettlementWindow.setDate(now.getDate() - now.getDay()); // 设置为本周日
+      startOfSettlementWindow.setHours(20, 0, 0, 0);
+
+      // 如果上次结算时间在本次结算窗口开始之后，则说明本周已结算，直接返回
+      if (lastSettlementDate.getTime() >= startOfSettlementWindow.getTime()) {
+        return;
+      }
+      
+      await performWeeklySettlement();
     }
     async function performWeeklySettlement(){
       const tasksRef = collection(db, `artifacts/${appId}/users/${userId}/tasks`);
@@ -449,7 +493,10 @@ showModal('每周结算完成', `本周获得 ${totalEarned} 分，扣除 ${dedu
     // 监听任务
     function fetchTasks(){
       if (!authStateReady || !userId) return;
-const tasksCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/tasks`);
+      const tasksCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/tasks`);
+      const now = new Date();
+      const isPlanningWindow = (now.getDay() === 0 && now.getHours() >= 20) || (now.getDay() === 1 && now.getHours() < 20);
+      
       onSnapshot(tasksCollectionRef, (qs)=>{
         taskList.innerHTML = '';
         qs.forEach((d)=>{
@@ -462,45 +509,113 @@ const tasksCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/ta
               <p class="text-sm text-gray-500 mb-1">特性: ${task.type} (${task.points}分)</p>
               <p class="text-gray-700 font-medium">${task.description}</p>
             </div>
-            <div>
-              <button data-task-id="${id}" class="complete-task-btn bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors ${isCompleted?'hidden':''}">
+            <div class="flex flex-col space-y-2 items-end">
+              <button data-task-id="${id}" class="complete-task-btn bg-green-500 text-white font-bold py-2 px-4 w-20 h-10 rounded-lg hover:bg-green-600 transition-colors ${isCompleted?'hidden':''}">
                 完成
               </button>
+              ${isPlanningWindow ? 
+                `<button data-task-id="${id}" class="delete-task-btn bg-red-500 text-white font-bold py-2 px-4 w-20 h-10 rounded-lg hover:bg-red-600 transition-colors">
+                  删除
+                </button>` 
+              : ''}
             </div>`;
           taskList.appendChild(el);
         });
+        
+        // 给完成按钮添加事件监听器
         document.querySelectorAll('.complete-task-btn').forEach(btn=>{
           btn.addEventListener('click', async (e)=>{
             const id = e.currentTarget.dataset.taskId;
-const ref = doc(db, `artifacts/${appId}/users/${userId}/tasks/${id}`);
+            const ref = doc(db, `artifacts/${appId}/users/${userId}/tasks/${id}`);
             const snap = await getDoc(ref);
-if (snap.exists() && snap.data().status !== 'completed'){
+            if (snap.exists() && snap.data().status !== 'completed'){
               await updateDoc(ref, { status:'completed' });
-}
+            }
           });
         });
+
+        // 新增：给删除按钮添加事件监听器
+        document.querySelectorAll('.delete-task-btn').forEach(btn=>{
+          btn.addEventListener('click', async (e)=>{
+            const id = e.currentTarget.dataset.taskId;
+            const ref = doc(db, `artifacts/${appId}/users/${userId}/tasks/${id}`);
+            showModal('确认删除', '你确定要删除此任务吗？', true, async ()=>{
+              await deleteDoc(ref);
+            });
+          });
+        });
+        
       }, (err)=>console.error('获取任务失败:', err));
-}
+    }
 
     // 我的信息
-    function fetchMyInfo(){
-      if (!authStateReady || !userId) return;
-const ref = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
-      onSnapshot(ref, (docSnap)=>{
-        if (!docSnap.exists()) return;
-        const data = docSnap.data();
-        currentPointsDisplay.textContent = data.currentPoints || 0;
-        totalPointsDisplay.textContent = data.totalEarnedPoints || 0;
-        userAvatar.src = data.avatar;
-        redeemedItemsList.innerHTML = '';
-        (data.itemsRedeemed || []).forEach(item=>{
-          const li = document.createElement('li');
-          li.textContent = `兑换了 ${item.name} (${item.points}分)`;
-          li.className = 'text-gray-600 mb-2';
-          redeemedItemsList.appendChild(li);
-        });
-      }, (err)=>console.error('获取用户信息失败:', err));
+    // 获取我的页面信息，包括昵称
+function fetchMyInfo(){
+  if (!authStateReady || !userId) return;
+  const ref = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
+  onSnapshot(ref, (docSnap)=>{
+    if (!docSnap.exists()) return;
+    const data = docSnap.data();
+    currentPointsDisplay.textContent = data.currentPoints || 0;
+    totalPointsDisplay.textContent = data.totalEarnedPoints || 0;
+    userAvatar.src = data.avatar;
+    redeemedItemsList.innerHTML = '';
+    (data.itemsRedeemed || []).forEach(item=>{
+      const li = document.createElement('li');
+      li.textContent = `兑换了 ${item.name} (${item.points}分)`;
+      li.className = 'text-gray-600 mb-2';
+      redeemedItemsList.appendChild(li);
+    });
+
+    // 新增：显示昵称，若未设置则显示默认值
+    const nicknameDisplay = document.getElementById('nickname-display');
+    const nicknameEditArea = document.getElementById('nickname-edit-area');
+    const nicknameDisplayArea = document.getElementById('nickname-display-area');
+
+    const userNickname = data.nickname || '未设置昵称';
+    nicknameDisplay.textContent = userNickname;
+    
+    // 每次数据更新时，都确保显示昵称区域，隐藏编辑区域
+    nicknameDisplayArea.classList.remove('hidden');
+    nicknameEditArea.classList.add('hidden');
+    
+  }, (err)=>console.error('获取用户信息失败:', err));
 }
+
+// 新增：昵称编辑功能
+const nicknameDisplayArea = document.getElementById('nickname-display-area');
+const nicknameEditArea = document.getElementById('nickname-edit-area');
+const editNicknameBtn = document.getElementById('edit-nickname-btn');
+const nicknameInput = document.getElementById('nickname-input');
+const saveNicknameBtn = document.getElementById('save-nickname-btn');
+
+// 点击编辑按钮，显示输入框
+editNicknameBtn.addEventListener('click', () => {
+    nicknameDisplayArea.classList.add('hidden');
+    nicknameEditArea.classList.remove('hidden');
+    nicknameInput.focus();
+});
+
+// 点击保存按钮，保存昵称
+saveNicknameBtn.addEventListener('click', async () => {
+    const newNickname = nicknameInput.value.trim();
+    if (!newNickname) {
+        showModal('提示', '昵称不能为空。');
+        return;
+    }
+
+    try {
+        const userPointsRef = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
+        await updateDoc(userPointsRef, { nickname: newNickname });
+        
+        // 成功后，只显示成功的提示，不手动操作UI
+        showModal('成功', '昵称更新成功！');
+        
+    } catch (error) {
+        console.error("更新昵称失败:", error);
+        showModal('失败', '更新失败，请稍后再试。');
+    }
+});
 
     // 公共商品
     function fetchPublicShopItems(){
@@ -742,4 +857,3 @@ getDoc(userPointsRef);
   </script>
 </body>
 </html>
-
