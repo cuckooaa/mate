@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mate - 用积分管理你的效率！</title>
-  <link rel="icon" type="image/png" href="./icon.png">
+  <link rel="icon" type="image/png" href="./a4.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
@@ -59,7 +59,7 @@
     </div>
   </div>
 
-  <div id="rules-page" class="page max-w-2xl w-full">
+  <div id="rules-page" class="page max-w-2xl w-full" >
     <div class="bg-white rounded-2xl shadow-xl p-8">
       <h2 class="text-3xl font-bold text-gray-800 mb-4 text-center">任务与积分规则</h2>
       <button id="rules-back-btn" class="mb-4 text-gray-600 hover:text-blue-600 transition-colors">← 返回计划页面</button>
@@ -102,27 +102,30 @@
     </div>
   </div>
 
-  <div id="app-container" class="hidden bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full pb-20 md:pb-8">
-    <header id="main-header" class="flex justify-between items-center mb-4">
-      <div>
-        <h1 class="text-4xl font-bold text-gray-800">Mate</h1>
-        <p class="text-gray-500">用积分管理你的效率！</p>
-        <p id="season-week" class="text-lg font-bold text-gray-600 mt-2"></p>
+  <div id="app-container" class="hidden bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full pb-20 md:pb-8 min-h-screen">
+    <header id="main-header" class="flex flex-col mb-4">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h1 class="text-4xl font-bold text-gray-800">Mate</h1>
+          <p class="text-gray-500">用积分管理你的效率！</p>
+          <p id="season-week" class="text-lg font-bold text-gray-600 mt-2"></p>
+        </div>
+        <button id="logout-btn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
+          登出
+        </button>
       </div>
-      <button id="logout-btn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
-        登出
-      </button>
+    
+      <!-- <div class="flex flex-col"> -->
+      <!-- <div class="text-sm text-center text-gray-400 mb-4">
+        <span id="user-id-display-header">正在登录...</span>
+      </div> -->
+      <nav class="fixed inset-x-0 bottom-0 py-4 flex  justify-evenly bg-white shadow-lg md:static md:bottom-auto md:bg-transparent md:shadow-none md:mb-4">
+        <a href="#" data-page="plan-page" class="text-white font-semibold rounded-full bg-blue-500 py-2 px-4 hover:bg-blue-300 transition-colors">计划</a>
+        <a href="#" data-page="shop-page" class="text-gray-500 hover:bg-blue-300 py-2 px-4 rounded-full transition-colors">商城</a>
+        <a href="#" data-page="my-page"   class="text-gray-500 hover:bg-blue-300 py-2 px-4 rounded-full transition-colors">我的</a>
+      </nav>
+      <!-- </div> -->
     </header>
-
-    <div class="text-sm text-center text-gray-400 mb-4">
-      <span id="user-id-display-header">正在登录...</span>
-    </div>
-
-    <nav class="fixed inset-x-0 bottom-0 py-4 flex justify-center space-x-16 bg-white shadow-lg md:static md:bottom-auto md:bg-transparent md:shadow-none md:mb-8">
-      <a href="#" data-page="plan-page" class="text-blue-600 font-medium border-b-2 border-blue-600 pb-1">计划</a>
-      <a href="#" data-page="shop-page" class="text-gray-500 hover:text-blue-600 transition-colors">商城</a>
-      <a href="#" data-page="my-page"   class="text-gray-500 hover:text-blue-600 transition-colors">我的</a>
-    </nav>
 
     <div id="plan-page" class="page active">
       <form id="task-form" class="mb-8">
@@ -157,22 +160,22 @@ border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
               </select>
             </div>
           </div>
-          <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+          <button type="submit" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
             添加任务
           </button>
         </div>
       </form>
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-2xl font-bold text-gray-800">本周任务列表</h2>
-        <a href="#" data-page="rules-page" class="text-blue-600 hover:underline">规则说明</a>
+        <!-- <a href="#" data-page="rules-page" class="text-blue-600 hover:underline">规则说明</a> -->
+        <button id="rules-page-btn" class="text-blue-600 hover:underline">规则说明</button>
       </div>
       <div>
         <div id="task-list" class="space-y-4"></div>
       </div>
     </div>
 
-    <div id="shop-page"
-class="page">
+    <div id="shop-page" class="page">
       <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">积分商城</h2>
 
       <div class="mb-8">
@@ -204,13 +207,15 @@ md:grid-cols-3 gap-6 mb-8"></div>
       <div id="private-shop-items" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
     </div>
 
+
     <div id="my-page" class="page">
       <div class="flex items-center justify-center mb-8">
           <div id="nickname-display-area" class="flex items-center space-x-2">
               <h2 id="nickname-display" class="text-3xl font-bold text-gray-800">未设置昵称</h2>
               <button id="edit-nickname-btn" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                      <path d="M5.433 13.905l5.132-5.132a.75.75 0 011.06 1.06L6.493 14.965a.75.75 0 01-1.06-1.06zM13.626 5.864l1.83 1.83a2.25 2.25 0 003.182-3.182l-1.83-1.83a2.25 2.25 0 00-3.182 3.182zM4.685 14.897l-3.32 3.32a.75.75 0 00.75.75l3.32-3.32a.75.75 0 00-.75-.75z" />
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                    <path d=" M12 8h-8c-2 0 -3 1 -3 3v8c0 2 1 3 3 3h8c2 0 3-1 3-3v-4" />
+                    <line x1="19" y1="5" x2="9" y2="15" />
                   </svg>
               </button>
           </div>
@@ -225,8 +230,7 @@ md:grid-cols-3 gap-6 mb-8"></div>
       <div class="flex flex-col items-center space-y-4 mb-8">
         <img id="user-avatar" class="w-24 h-24 rounded-full border-4 border-white shadow-lg" alt="用户头像">
         <p class="text-lg font-bold text-gray-800">用户:
-          <span
-id="user-id-display-my" class="font-normal text-sm text-gray-500"></span>
+          <span id="user-id-display-my" class="font-normal text-sm text-gray-500"></span>
         </p>
         <div class="flex space-x-8">
           <div class="text-center">
@@ -243,6 +247,7 @@ id="user-id-display-my" class="font-normal text-sm text-gray-500"></span>
       <h3 class="text-xl font-bold text-gray-700 mb-2">兑换过的商品</h3>
       <ul id="redeemed-items-list" class="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200"></ul>
     </div>
+
   </div>
 
   <div id="my-modal" class="modal">
@@ -319,7 +324,7 @@ document.getElementById('season-week').textContent = `S${season} 赛季 第 ${we
     const appContainer = document.getElementById('app-container');
     const mainHeader = document.getElementById('main-header'); // 新增
     const introPage = document.getElementById('intro-page');
-    const rulesPage = document.getElementById('rules-page');
+    const rulesPageBtn = document.getElementById('rules-page-btn');
     const introLoginBtn = document.getElementById('intro-login-btn');
     const rulesBackBtn = document.getElementById('rules-back-btn');
     const authForm = document.getElementById('auth-form');
@@ -405,11 +410,11 @@ const modalConfirmBtn = document.getElementById('modal-confirm-btn');
         // 更新底部导航链接的样式，仅针对 app-container 内的导航
         if (e.currentTarget.closest('#app-container')) {
           document.querySelectorAll('#app-container nav a').forEach(a => {
-            a.classList.remove('border-blue-600', 'text-blue-600');
+            a.classList.remove('bg-blue-500', 'text-white', 'font-semibold');
             a.classList.add('text-gray-500');
           });
           e.currentTarget.classList.remove('text-gray-500');
-          e.currentTarget.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+          e.currentTarget.classList.add('text-white', 'bg-blue-500','font-semibold');
         }
       });
     });
@@ -421,8 +426,14 @@ const modalConfirmBtn = document.getElementById('modal-confirm-btn');
     
     // 新增：规则页返回按钮
     rulesBackBtn.addEventListener('click', ()=>{
+      appContainer.classList.remove('hidden');
       showPage('plan-page');
     });
+
+    rulesPageBtn.addEventListener('click', ()=>{
+      appContainer.classList.add('hidden');
+      showPage('rules-page')
+    })
 
     // 任务表单开放时间提示
     function updateTaskFormStatus() {
@@ -761,6 +772,9 @@ await updateDoc(itemRef, { points: parseInt(newPoints) });
       try{ await addDoc(ref, newItem); showModal('添加成功', '商品添加成功！'); addPrivateShopItemForm.reset(); }
       catch(err){ console.error('添加商品失败:', err); showModal('添加失败', '请重试。'); }
     });
+
+
+
     // 添加任务
     taskForm?.addEventListener('submit', async (e)=>{
       e.preventDefault();
@@ -826,7 +840,7 @@ authForm.addEventListener('submit', async (e)=>{
         if (user){
           userId = user.uid;
           authStateReady = true;
-          userIdDisplayHeader.textContent = `用户ID: ${userId}`;
+          // userIdDisplayHeader.textContent = `用户ID: ${userId}`;
           userIdDisplayMy.textContent = userId;
 
           const userPointsRef = doc(db, `artifacts/${appId}/users/${userId}/user_info/points`);
