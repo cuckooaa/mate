@@ -522,11 +522,11 @@ showModal('每周结算完成', `本周获得 ${totalEarned} 分，扣除 ${dedu
             </div>
             <div class="flex flex-col space-y-2 items-end">
               <button data-task-id="${id}" class="complete-task-btn bg-green-500 text-white font-bold py-2 px-4 w-20 h-10 rounded-lg hover:bg-green-600 transition-colors ${isCompleted?'hidden':''}">
-                完成
+                🖌︎
               </button>
               ${isPlanningWindow ? 
                 `<button data-task-id="${id}" class="delete-task-btn bg-red-500 text-white font-bold py-2 px-4 w-20 h-10 rounded-lg hover:bg-red-600 transition-colors">
-                  删除
+                  🗶
                 </button>` 
               : ''}
             </div>`;
@@ -871,3 +871,4 @@ getDoc(userPointsRef);
   </script>
 </body>
 </html>
+
