@@ -686,8 +686,8 @@ class="rounded-lg object-cover w-full h-40">
             <button data-item-id="${id}" data-item-name="${item.name}" data-item-points="${item.points}"
                     class="buy-item-btn w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">兑换</button>
             <div class="flex space-x-2">
-              <button data-item-id="${id}" class="edit-item-btn bg-yellow-500 text-white text-sm py-1 px-2 rounded-lg hover:bg-yellow-600 transition-colors">🖌︎</button>
-              <button data-item-id="${id}" class="delete-item-btn bg-red-500 text-white text-sm py-1 px-2 rounded-lg hover:bg-red-600 transition-colors">🗶</button>
+              <button data-item-id="${id}" class="edit-item-btn bg-yellow-500 text-white text-sm py-1 px-2 rounded-lg hover:bg-yellow-600 transition-colors">✐</button>
+              <button data-item-id="${id}" class="delete-item-btn bg-red-500 text-white text-sm py-1 px-2 rounded-lg hover:bg-red-600 transition-colors">×</button>
             </div>`;
 privateShopItemList.appendChild(el);
         });
@@ -871,5 +871,6 @@ getDoc(userPointsRef);
   </script>
 </body>
 </html>
+
 
 
