@@ -20,7 +20,7 @@
 ### 2. 计时与积分
 任务条右上角有计时器。点击它（变蓝）开始任务计时，再次点击（变灰）暂停。注意：计时支持离线持续，但同一时刻只能对一个任务计时。
 
-<img width="30%" alt="image" src="https://github.com/user-attachments/assets/ef61aeba-fcd2-45ca-8c90-56c0bd84cdbc" />                                                                     
+<img width="30%" alt="image" src="https://github.com/user-attachments/assets/ef61aeba-fcd2-45ca-8c90-56c0bd84cdbc" />  
 
 <img width="30%" alt="image" src="https://github.com/user-attachments/assets/0351c7bd-254e-4c33-9342-0e5b51b4aca5" />
 
